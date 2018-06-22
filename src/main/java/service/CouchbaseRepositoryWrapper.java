@@ -16,7 +16,7 @@ public class CouchbaseRepositoryWrapper {
     public void getConnection(io.vertx.core.json.JsonObject config, Handler<AsyncResult<AsyncBucket>> readyHandler) {
         AsyncCluster cluster = CouchbaseAsyncCluster.create(config.getString("hostName"));
         cluster.authenticate(config.getString("username"), config.getString("password"))
-            .openBucket(config.getString("bucketName"))
+            .openBucket(config.getString("becketName"))
             .doOnError(throwable -> {
                 System.out.println("Unable to open bucket");
             })

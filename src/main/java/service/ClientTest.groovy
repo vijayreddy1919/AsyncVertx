@@ -118,6 +118,7 @@ asyncConditions = new AsyncConditions();
         when:
         bucket.upsert(JsonDocument.create("foo")).subscribe({jsonDocument -> asyncConditions.evaluate {jsonDocument!=null}; System.out.print(jsonDocument.toString() + "!" ); s[0] = "changed";});
 
+
         bucket.get(JsonDocument.create("foo")).subscribe({jsonDocument -> asyncConditions.evaluate {jsonDocument!=null}; System.out.print(jsonDocument); s[0] = "changed";});
 
         System.out.print(s[0]);

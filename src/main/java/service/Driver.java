@@ -9,6 +9,13 @@ public class Driver
 static CouchbaseRepositoryWrapper repo = new CouchbaseRepositoryWrapper();
 static AsyncBucket bucket = null;
 public static void main(String args[]){
+
+
+
+
+
+
+
     JsonObject config = new JsonObject();
     config.put("username","user");
     config.put("password","password");
@@ -66,5 +73,6 @@ public static void main(String args[]){
 
 
 }
+
 
 }

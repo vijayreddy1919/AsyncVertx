@@ -19,7 +19,9 @@ sourceCompatibility = '1.8'
 
 dependencies {
 
+        compile "com.couchbase.mock:CouchbaseMock:1.5.18"
   compile "io.vertx:vertx-core:$vertxVersion"
+
 
   compile "io.vertx:vertx-unit:$vertxVersion"
 

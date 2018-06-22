@@ -42,7 +42,8 @@ class TestSpecification extends Specification{
                     asyncConditions.evaluate {
 
                         if (event.succeeded()) {
-                            bucket = event.result();
+//                            bucket = event.result();
+
 
                         }
                         if (event.failed()) {

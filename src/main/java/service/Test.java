@@ -3,6 +3,7 @@ package service;
 import com.couchbase.client.java.AsyncBucket;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
+import rx.Observable;
 import spock.util.concurrent.AsyncConditions;
 
 
@@ -51,5 +52,15 @@ static AsyncConditions asyncConditions = new AsyncConditions();
         bucket.upsert(JsonDocument.create("foo")).subscribe(jsonDocument -> System.out.println(jsonDocument));
         Thread.sleep(50000);
 System.out.println("Done");
+
+
+
     }
+
+public Observable<String> doSomething(){
+        Observable<String> obs = Observable.just("aaaa");
+    return null;
+
+}
+
 }

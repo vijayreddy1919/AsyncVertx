@@ -99,10 +99,15 @@ public class CouchbaseRepositoryWrapper {
     public void createDocument(AsyncBucket asyncBucket, JsonDocument document, Handler<AsyncResult<JsonObject>> readyHandler) {
         // id ????
         asyncBucket.insert(document)
-            .subscribe(doc -> {
+            .subscribe(
+
+                doc -> {
+
                     readyHandler.handle(Future.succeededFuture(doc.content()));
                 },
-                err -> {readyHandler.handle(Future.failedFuture("Exception: Unable to create document - " + err.getCause()));});
+                err -> {
+
+                    readyHandler.handle(Future.failedFuture("Exception: Unable to create document - " + err.getCause()));});
     }
 
     public void updateDocumentByN1QLQuery(AsyncBucket asyncBucket, N1qlQuery query, Handler<AsyncResult<io.vertx.core.json.JsonArray>> readyHandler) {
@@ -134,7 +139,9 @@ public class CouchbaseRepositoryWrapper {
 
     public void upsertDocument(AsyncBucket asyncBucket, JsonDocument document, Handler<AsyncResult<JsonObject>> readyHandler) {
         asyncBucket.upsert(document)
-            .subscribe(doc -> {
+            .subscribe(
+
+                doc -> {
                 readyHandler.handle(Future.succeededFuture(doc.content()));
             }, err -> {readyHandler.handle(Future.failedFuture("Exception: Unable to update document - " + err.getCause()));});
     }

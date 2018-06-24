@@ -35,11 +35,13 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
         //Mock bucket and define dummy methods
         bucket = Mock()
-        bucket.name() >> { return "test" }
+
+        //When name method is invoked on this object, then it returns "test".
+        bucket.name() >> "test"
 
         Observable<JsonDocument> jsonObs = Observable.just(doc);
 
-
+//When upsert method is called on this object with ANY parameter, it returns jsonObs object defined above
         bucket.upsert(_) >> jsonObs
         bucket.insert(_) >> jsonObs
         bucket.remove(_) >> jsonObs
@@ -64,7 +66,7 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
 
 
-        asyncN1qlQueryResult.rows() >> { return queryRowObs }
+        asyncN1qlQueryResult.rows() >> queryRowObs
 
 
 

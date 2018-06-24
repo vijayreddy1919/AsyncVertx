@@ -53,14 +53,14 @@ super();
             .bootstrapHttpDirectPort(httpPort)
             .build(), "couchbase://127.0.0.1");
 
-        cluster.openBucket("default").doOnError(throwable ->
-            System.out.println("Unable to open bucket")
+        cluster.openBucket("default").doOnError({throwable ->
+            System.out.println("Unable to open bucket")}
         ).subscribe(handler,
 
 
-            err ->
+            {err ->
                 System.out.println("Exception in bucket creation = " + err.getCause())
-
+            }
         );
 
     }

@@ -1,9 +1,13 @@
-package service
-
+package wrapperclass
 import com.couchbase.client.java.AsyncBucket
 import com.couchbase.client.java.document.JsonDocument
 import com.couchbase.client.java.document.json.JsonObject
+import com.couchbase.client.java.query.AsyncN1qlQueryResult
 import com.couchbase.client.java.query.N1qlQuery
+import rx.Subscriber
+import rx.functions.Action1
+import service.CouchbaseRepositoryWrapper
+import service.MockCouchbaseClient
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.AsyncConditions
@@ -16,7 +20,7 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
     private CouchbaseRepositoryWrapper wrapper = new CouchbaseRepositoryWrapper();
     private JsonDocument doc1;
     private JsonDocument doc2;
-    private JsonDocument doc3;
+    private JsonDocument doc3
 
     private @Shared MockCouchbaseClient mockCouchbaseClient = MockCouchbaseClient.getInstance();
 
@@ -44,11 +48,25 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
         doc3 = JsonDocument.create("moo", new JsonObject().put("testData1", "aaaaa").put("testData2", "zzzzzz"))
 
         asyncConditions = new AsyncConditions()
+
+    bucket.insert(doc1).subscribe({doc -> asyncConditions.evaluate { assert(doc!=null)} })
+
+        asyncConditions.await(1)
+        asyncConditions = new AsyncConditions()
+
     }
 
 
 
+def cleanup(){
 
+    asyncConditions = new AsyncConditions()
+bucket.remove("foo").subscribe({},{})
+    bucket.remove("moo").subscribe({},{})
+
+    //  bucket.
+
+}
 
 
     def "creating a document by N1QL query"() {
@@ -70,7 +88,8 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
                 if (async.succeeded()) {
                     asyncConditions.evaluate
                         {
-                            print async.result().toString()
+                            // print async.result().toString()
+                            assert  async.result()!=null
                         }
                 }
 
@@ -94,19 +113,20 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
         when:
 
-        wrapper.createDocument(bucket, doc1, {
+        wrapper.createDocument(bucket, doc2, {
 
             async ->
                 if (async.succeeded()) {
                     asyncConditions.evaluate
                         {
-                            print async.result()
+                            assert async.result()!=null
                         }
                 }
 
 
                 if (async.failed()) {
                     print async.cause()
+
                 }
         })
 
@@ -129,7 +149,8 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
                 if (async.succeeded()) {
                     asyncConditions.evaluate
                         {
-                            print async.result()
+                            //print async.result()
+                            async.result()!=null
                         }
                 }
 
@@ -158,7 +179,8 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
                 if (async.succeeded()) {
                     asyncConditions.evaluate
                         {
-                            print async.result()
+                            // print async.result()
+                            assert  async.result()!=null
                         }
                 }
 
@@ -181,13 +203,14 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
         when:
 
-        wrapper.updateDocument(bucket, doc2 , {
+        wrapper.updateDocument(bucket, doc1, {
 
             async ->
                 if (async.succeeded()) {
                     asyncConditions.evaluate
                         {
-                            print async.result()
+                            //print async.result()
+                            assert  async.result()!=null
                         }
                 }
 
@@ -211,13 +234,14 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
         when:
 
-        wrapper.deleteDocument(bucket, doc3 , {
+        wrapper.deleteDocument(bucket, doc1 , {
 
             async ->
                 if (async.succeeded()) {
                     asyncConditions.evaluate
                         {
                             print async.result()
+                            assert  async.result()!=null
                         }
                 }
 
@@ -235,7 +259,7 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
     }
 
 
-    def "updating a document by key"() {
+    def "deleting a document by key"() {
 
         given:
 
@@ -247,7 +271,8 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
                 if (async.succeeded()) {
                     asyncConditions.evaluate
                         {
-                            print async.result()
+                            //  print async.result()
+                            assert  async.result()!=null
                         }
                 }
 

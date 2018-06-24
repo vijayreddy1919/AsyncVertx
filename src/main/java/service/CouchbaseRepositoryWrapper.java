@@ -159,6 +159,7 @@ public class CouchbaseRepositoryWrapper {
     public void deleteDocumentByKey(AsyncBucket asyncBucket, String id, Handler<AsyncResult<String>> readyHandler) {
         asyncBucket.remove(id)
             .subscribe(doc -> {
+
             }, err -> {
                 //System.out.println("Unable to delete document");
                 readyHandler.handle(Future.failedFuture("Unable to delete document = " + err));

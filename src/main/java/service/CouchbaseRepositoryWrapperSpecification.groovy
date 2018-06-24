@@ -19,21 +19,18 @@ import spock.util.concurrent.AsyncConditions
 class CouchbaseRepositoryWrapperSpecification extends Specification {
 
 
-    private @Shared
-    AsyncConditions asyncConditions
+    private AsyncConditions asyncConditions
     private AsyncBucket bucket
     private CouchbaseRepositoryWrapper wrapper = new CouchbaseRepositoryWrapper();
-    private JsonDocument doc;
+    private JsonDocument doc
 
 
     def setup() {
 
         doc = JsonDocument.create("foo", new JsonObject().put("testData1", "xxxxx").put("testData2", "yyyyyy"))
         JsonObject jsonObject = JsonObject.create().put("test", doc.content())
-        AsyncN1qlQueryRow asyncN1qlQueryRow = Mock()
-        asyncN1qlQueryRow.value() >> jsonObject
 
-        AsyncN1qlQueryResult asyncN1qlQueryResult = Mock()
+
 
 
         //Mock bucket and define dummy methods
@@ -53,6 +50,13 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
         //Setup for mocking query method in bucket
 
+
+        AsyncN1qlQueryRow asyncN1qlQueryRow = Mock()
+        asyncN1qlQueryRow.value() >> jsonObject
+
+        AsyncN1qlQueryResult asyncN1qlQueryResult = Mock()
+
+
         Observable<AsyncN1qlQueryResult> queryResultObs = Observable.just(asyncN1qlQueryResult);
 
         Observable<AsyncN1qlQueryRow> queryRowObs = Observable.just(asyncN1qlQueryRow);
@@ -61,6 +65,9 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
 
         asyncN1qlQueryResult.rows() >> { return queryRowObs }
+
+
+
 
         asyncConditions = new AsyncConditions()
 

@@ -1,6 +1,7 @@
-package wrapperclass
+package service
 
 import com.couchbase.client.java.AsyncBucket
+import com.couchbase.client.java.CouchbaseAsyncCluster
 import com.couchbase.client.java.document.JsonDocument
 import com.couchbase.client.java.document.json.JsonObject
 import com.couchbase.client.java.query.AsyncN1qlQueryResult
@@ -10,11 +11,9 @@ import rx.Observable
 import rx.Subscriber
 import rx.functions.Action1
 import service.CouchbaseRepositoryWrapper
-import service.MockCouchbaseClient
-import service.Stuff
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.AsyncConditions
+import service.CouchbaseRepositoryWrapper
 
 class CouchbaseRepositoryWrapperSpecification extends Specification {
 
@@ -23,11 +22,15 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
     private AsyncBucket bucket
     private CouchbaseRepositoryWrapper wrapper = new CouchbaseRepositoryWrapper();
     private JsonDocument doc
-
+    private JsonDocument failDoc
+private static String PASS_INPUT = "pass"
+    private static String FAIL_INPUT = "fail"
 
     def setup() {
 
         doc = JsonDocument.create("foo", new JsonObject().put("testData1", "xxxxx").put("testData2", "yyyyyy"))
+        failDoc = JsonDocument.create("foo", new JsonObject().put("testData1", "zzzzz").put("testData2", "yyyyyy"))
+
         JsonObject jsonObject = JsonObject.create().put("test", doc.content())
 
 
@@ -41,13 +44,28 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
         Observable<JsonDocument> jsonObs = Observable.just(doc);
 
+        Observable<JsonDocument> failObs = Observable.just(new Throwable());
+    //    failObs.subscribe(_,_) >> {onNext,onError -> onError(new Throwable())  }
+
 //When upsert method is called on this object with ANY parameter, it returns jsonObs object defined above
         bucket.upsert(_) >> jsonObs
-        bucket.insert(_) >> jsonObs
-        bucket.remove(_) >> jsonObs
-        bucket.get(_) >> jsonObs
-        bucket.replace(_) >> jsonObs
 
+        bucket.insert(doc) >> jsonObs
+        bucket.remove(PASS_INPUT) >> jsonObs
+        bucket.remove(doc) >> jsonObs
+        bucket.get(doc) >> jsonObs
+        bucket.get(PASS_INPUT) >> jsonObs
+        bucket.replace(doc) >> jsonObs
+
+        bucket.upsert(failDoc) >> failObs
+        bucket.insert(failDoc) >> failObs
+        bucket.remove(FAIL_INPUT) >> failObs
+        bucket.remove(failDoc) >> failObs
+
+        bucket.get(failDoc) >> failObs
+        bucket.get(FAIL_INPUT) >> failObs
+
+        bucket.replace(failDoc) >> failObs
 
 
         //Setup for mocking query method in bucket
@@ -67,7 +85,7 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
 
         asyncN1qlQueryResult.rows() >> queryRowObs
-
+asyncN1qlQueryResult.finalSuccess() >> Observable.just(true)
 
 
 
@@ -138,6 +156,37 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
     }
 
+
+    def "creating a document fail case"() {
+
+        given:
+
+        when:
+
+        wrapper.createDocument(bucket, failDoc, {
+
+            async ->
+                if (async.succeeded()) {
+                    asyncConditions.evaluate
+                        {
+                            assert async.result() != null
+                        }
+                }
+
+
+                if (async.failed()) {
+                    print async.cause()
+
+                }
+        })
+
+
+        then:
+        asyncConditions.await(1)
+
+
+    }
+
     def "upserting a document"() {
 
         given:
@@ -168,13 +217,74 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
     }
 
+    def "upserting a document fail case"() {
+
+        given:
+
+        when:
+
+        wrapper.upsertDocument(bucket, failDoc, {
+
+            async ->
+                if (async.succeeded()) {
+                    asyncConditions.evaluate
+                        {
+                            //print async.result()
+                            async.result() != null
+                        }
+                }
+
+
+                if (async.failed()) {
+                    print async.cause()
+                }
+        })
+
+
+        then:
+        asyncConditions.await(1)
+
+
+    }
+
     def "getting a document"() {
 
         given:
 
         when:
 
-        wrapper.getDocumentByKey(bucket, "foo", {
+        wrapper.getDocumentByKey(bucket, PASS_INPUT, {
+
+            async ->
+                if (async.succeeded()) {
+                    asyncConditions.evaluate
+                        {
+                            // print async.result()
+                            assert async.result() != null
+                        }
+                }
+
+
+                if (async.failed()) {
+                    print async.cause()
+                }
+        })
+
+
+        then:
+        asyncConditions.await(1)
+
+
+    }
+
+
+    def "getting a document fail"() {
+
+        given:
+
+        when:
+
+        wrapper.getDocumentByKey(bucket, FAIL_INPUT, {
 
             async ->
                 if (async.succeeded()) {
@@ -228,6 +338,35 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
 
     }
 
+    def "updating a document fail"() {
+
+        given:
+
+        when:
+
+        wrapper.updateDocument(bucket, failDoc, {
+
+            async ->
+                if (async.succeeded()) {
+                    asyncConditions.evaluate
+                        {
+                            //print async.result()
+                            assert async.result() != null
+                        }
+                }
+
+
+                if (async.failed()) {
+                    print async.cause()
+                }
+        })
+
+
+        then:
+        asyncConditions.await(1)
+
+
+    }
 
     def "deleting a document"() {
 
@@ -260,13 +399,76 @@ class CouchbaseRepositoryWrapperSpecification extends Specification {
     }
 
 
+    def "deleting a document fail"() {
+
+        given:
+
+        when:
+
+        wrapper.deleteDocument(bucket, failDoc, {
+
+            async ->
+                if (async.succeeded()) {
+                    asyncConditions.evaluate
+                        {
+                            print async.result()
+                            assert async.result() != null
+                        }
+                }
+
+
+                if (async.failed()) {
+                    print async.cause()
+                }
+        })
+
+
+        then:
+        asyncConditions.await(1)
+
+
+    }
+
+
     def "deleting a document by key"() {
 
         given:
 
         when:
 
-        wrapper.deleteDocumentByKey(bucket, "foo", {
+        wrapper.deleteDocumentByKey(bucket, PASS_INPUT, {
+
+            async ->
+                if (async.succeeded()) {
+                    asyncConditions.evaluate
+                        {
+                            //  print async.result()
+                            assert async.result() != null
+                        }
+                }
+
+
+                if (async.failed()) {
+                    print async.cause()
+                }
+        })
+
+
+        then:
+        asyncConditions.await(1)
+
+
+    }
+
+
+
+    def "deleting a document by key fail"() {
+
+        given:
+
+        when:
+
+        wrapper.deleteDocumentByKey(bucket, FAIL_INPUT, {
 
             async ->
                 if (async.succeeded()) {

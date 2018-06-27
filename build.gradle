@@ -6,6 +6,9 @@ plugins {
 
 ext {
   vertxVersion = '3.5.0'
+    powermockVersion = '2.0.0-beta.5'
+    mockito2Version = '2.18.0'
+
 }
 
 repositories {
@@ -19,16 +22,31 @@ sourceCompatibility = '1.8'
 
 dependencies {
 
-        compile "com.couchbase.mock:CouchbaseMock:1.5.18"
-  compile "io.vertx:vertx-core:$vertxVersion"
+
+ //   compile 'org.powermock:powermock-api-mockito:1.6.4'
+/*    compile 'org.powermock:powermock-module-junit4-rule:1.6.4'
+    compile 'org.powermock:powermock-module-junit4:1.6.4'
+    compile 'org.powermock:powermock-classloading-xstream:1.6.4'
 
 
-  compile "io.vertx:vertx-unit:$vertxVersion"
+    compile "org.powermock:powermock-core:${powermockVersion}"
+    compile "org.powermock:powermock-module-junit4:${powermockVersion}"
+    compile "org.powermock:powermock-api-mockito2:${powermockVersion}"
+    compile "org.mockito:mockito-core:${mockito2Version}"*/
+
+    compile 'org.jmockit:jmockit:1.8'
+    compile "com.couchbase.mock:CouchbaseMock:1.5.18"
+    compile "io.vertx:vertx-core:$vertxVersion"
+    compile 'cglib:cglib:3.1'
+
+    compile "io.vertx:vertx-unit:$vertxVersion"
 
     compile 'com.couchbase.client:java-client:2.5.5'
     compile 'org.spockframework:spock-core:1.0-groovy-2.4'
-}
 
+
+
+}
 mainClassName = 'com.example.AsyncVertx.MainVerticle'
 
 shadowJar {

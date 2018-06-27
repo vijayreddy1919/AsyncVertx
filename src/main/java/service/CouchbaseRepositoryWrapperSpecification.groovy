@@ -1,12 +1,15 @@
 package service
 
+import com.couchbase.client.core.message.stat.Stat
 import com.couchbase.client.java.AsyncBucket
+import com.couchbase.client.java.AsyncCluster
 import com.couchbase.client.java.CouchbaseAsyncCluster
 import com.couchbase.client.java.document.JsonDocument
 import com.couchbase.client.java.document.json.JsonObject
 import com.couchbase.client.java.query.AsyncN1qlQueryResult
 import com.couchbase.client.java.query.AsyncN1qlQueryRow
 import com.couchbase.client.java.query.N1qlQuery
+import mockit.MockUp
 import rx.Observable
 import rx.Subscriber
 import rx.functions.Action1
@@ -15,16 +18,23 @@ import spock.lang.Specification
 import spock.util.concurrent.AsyncConditions
 import service.CouchbaseRepositoryWrapper
 
+
 class CouchbaseRepositoryWrapperSpecification extends Specification {
 
-
-    private AsyncConditions asyncConditions
+     private AsyncConditions asyncConditions
     private AsyncBucket bucket
     private CouchbaseRepositoryWrapper wrapper = new CouchbaseRepositoryWrapper();
     private JsonDocument doc
     private JsonDocument failDoc
 private static String PASS_INPUT = "pass"
     private static String FAIL_INPUT = "fail"
+
+    def setupSpec(){
+
+
+
+    }
+
 
     def setup() {
 
@@ -37,7 +47,8 @@ private static String PASS_INPUT = "pass"
 
 
         //Mock bucket and define dummy methods
-        bucket = Mock()
+        AsyncBucket mockBucket = Mock(AsyncBucket.class)
+
 
         //When name method is invoked on this object, then it returns "test".
         bucket.name() >> "test"
@@ -86,6 +97,35 @@ private static String PASS_INPUT = "pass"
 
         asyncN1qlQueryResult.rows() >> queryRowObs
 asyncN1qlQueryResult.finalSuccess() >> Observable.just(true)
+
+
+
+        CouchbaseAsyncCluster cluster = Mock()
+
+        // AsyncCluster test = CouchbaseAsyncCluster.create("Testy")
+        //  println test
+
+        AsyncCluster asyncCluster = Mock(AsyncCluster.class)
+        asyncCluster.authenticate(_,_) >> asyncCluster
+        asyncCluster.openBucket(_) >> Observable.just(mockBucket)
+
+
+new MockUp<CouchbaseAsyncCluster>(){
+
+    public AsyncCluster create(String host){
+        return asyncCluster;
+    }
+
+};
+        io.vertx.core.json.JsonObject config = new io.vertx.core.json.JsonObject()
+        config.put("hostName" , "test")
+        config.put("username" , "x")
+        config.put("password" , "x")
+        config.put("bucketName" , "x")
+
+        wrapper.getConnection(config,   { x-> if(x.succeeded()) { bucket = x.result()} })
+
+
 
 
 
